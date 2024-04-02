@@ -7,19 +7,20 @@ from collections import OrderedDict
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 
+
 class Transaction:
 
-    def __init__(self, sender_public_key, sender_private_key, recipient_public_key, amount):
+    def __init__(self, sender_public_key, sender_private_key, recipient_public_key, data):
         self.sender_public_key = sender_public_key
         self.sender_private_key = sender_private_key
         self.recipient_public_key = recipient_public_key
-        self.amount = amount
+        self.data = data
 
     # this function to convert transaction object to dictionary
     def to_dict(self):
         return OrderedDict({'sender_public_key': self.sender_public_key,
                             'recipient_public_key': self.recipient_public_key,
-                            'amount': self.amount})
+                            'data': self.data})
 
     # this function to sign the transactions
     def sign_transaction(self):
@@ -75,9 +76,9 @@ def generate_transaction():
     sender_public_key = request.form['sender_public_key']
     sender_private_key = request.form['sender_private_key']
     recipient_public_key = request.form['recipient_public_key']
-    amount = request.form['amount']
+    data = request.form['data']
 
-    transaction = Transaction(sender_public_key, sender_private_key, recipient_public_key, amount)
+    transaction = Transaction(sender_public_key, sender_private_key, recipient_public_key, data)
 
     response = {'transaction': transaction.to_dict(),
                 'signature': transaction.sign_transaction()

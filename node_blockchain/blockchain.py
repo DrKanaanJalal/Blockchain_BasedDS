@@ -109,7 +109,7 @@ class Blockchain:
             if block['previous_hash'] != self.hash(last_block):
                 return False
             transactions = block['transactions'][:-1]  # To ignor the last transaction
-            transaction_elements = ['sender_public_key', 'recipient_public_key', 'amount']
+            transaction_elements = ['sender_public_key', 'recipient_public_key', 'data']
             transactions = [OrderedDict((k, transaction[k]) for k in transaction_elements) for transaction in
                             transactions]
             if not self.valid_proof(transactions, block['previous_hash'], block['nonce'], MINING_DIFFICULTY):
@@ -127,11 +127,11 @@ class Blockchain:
         h.update(block_string)
         return h.hexdigest()
 
-    def submit_transaction(self, sender_public_key, recipient_public_key, signature, amount):
+    def submit_transaction(self, sender_public_key, recipient_public_key, signature, data):
         transaction = OrderedDict({
             'sender_public_key': sender_public_key,
             'recipient_public_key': recipient_public_key,
-            'amount': amount,
+            'data': data,
         })
         # reword for mining Block
         if sender_public_key == MINING_SENDER:
@@ -188,7 +188,7 @@ def mine():
     blockchain.submit_transaction(sender_public_key=MINING_SENDER,
                                   recipient_public_key=blockchain.node_id,
                                   signature='',
-                                  amount=MINING_REWORD
+                                  data=MINING_REWORD
                                   )
     last_block = blockchain.chain[-1]
     previous_hash = blockchain.hash(last_block)
@@ -210,7 +210,7 @@ def new_transaction():
     required = ['confirmation_sender_public_key',
                 'confirmation_recipient_public_key',
                 'transaction_signature',
-                'confirmation_amount'
+                'confirmation_data'
                 ]
     if not all(k in values for k in required):
         return 'Missing values', 404
@@ -218,7 +218,7 @@ def new_transaction():
     transaction_results = blockchain.submit_transaction(values['confirmation_sender_public_key'],
                                                         values['confirmation_recipient_public_key'],
                                                         values['transaction_signature'],
-                                                        values['confirmation_amount']
+                                                        values['confirmation_data']
                                                         )
     if not transaction_results:
         response = {'message': 'invalid transaction'}
@@ -269,7 +269,7 @@ def register_nodes():
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('-p', '--port', default=5001, type=int, help='port to listen to')
+    parser.add_argument('-p', '--port', default=5000, type=int, help='port to listen to')
     args = parser.parse_args()
     port = args.port
     app.run(host='127.0.0.1', port=port)
